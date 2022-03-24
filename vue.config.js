@@ -1,3 +1,5 @@
+/* eslint-disable multiline-ternary */
+/* eslint-disable operator-linebreak */
 const path = require('path')
 const themePath = path.join(__dirname, './src/theme.less')
 
@@ -9,7 +11,6 @@ module.exports = defineConfig({
 })
 
 module.exports = {
-  publicPath: './',
   css: {
     loaderOptions: {
       less: {
@@ -25,4 +26,9 @@ module.exports = {
       }
     }
   }
+}
+
+module.exports = {
+  publicPath: process.env.NODE_ENV === 'production' ?
+    '/production-sub-path/' : '/'
 }
