@@ -2,9 +2,15 @@
   <div class="home-container">
     <!-- 头部区域 -->
     <van-nav-bar title="黑马头条" fixed />
-    <van-list v-model="loading" :finished="finished" finished-text="没有更多了" @load="onLoad">
-      <ArticleInfo v-for="item in artlist" :key="item.id" :title="item.title" :author="item.aut_name" :cmt-count="item.comm_count" :time="item.pubdate" :cover="item.cover"></ArticleInfo>
-    </van-list>
+    <van-pull-refresh v-model="isLoading" @refresh="onRefresh" :disabled="finished" success-text="刷新成功">
+      <!-- 释放提示 -->
+      <template #loading v-if="finished">
+        <p>没有更多了</p>
+      </template>
+      <van-list v-model="loading" :finished="finished" finished-text="没有更多了" @load="onLoad">
+        <ArticleInfo v-for="item in artlist" :key="item.id" :title="item.title" :author="item.aut_name" :cmt-count="item.comm_count" :time="item.pubdate" :cover="item.cover"></ArticleInfo>
+      </van-list>
+    </van-pull-refresh>
   </div>
 </template>
 
@@ -29,7 +35,9 @@ export default {
       // 由于页面初始化请求了一次数据。所以loading默认为true，即不会自动调用
       loading: true,
       // 所有数据是否加载完成了，如果没有更多数据，设置为true
-      finished: false
+      finished: false,
+      // 是否正在下拉刷新  false 为加载完成
+      isLoading: false
     }
   },
   created() {
@@ -37,13 +45,20 @@ export default {
   },
   methods: {
     // 封装获取文章列表数据的方法
-    async initArticleList() {
+    async initArticleList(isRefresh) {
       // 发起get请求,获取文章的列表数据
       const { data: res } = await getArticleListAPI(this.page, this.limit)
-      this.artlist = [...this.artlist, ...res]
+      // 判断数据拼接顺序
+      if (isRefresh) {
+        // 下拉属性：新数据在前，旧数据在后
+        this.artlist = [...res, ...this.artlist]
+        this.isLoading = false
+      } else {
+        // 上拉加载：旧数据在前，新数据在后
+        this.artlist = [...this.artlist, ...res]
+      }
       // 第一页数据请求完之后，开启下一页请求判断
       this.loading = false
-
       if (res.length === 0) {
         // 证明没有下一页的数据了，直接把finished改为true，表示数据加载完了
         this.finished = true
@@ -56,6 +71,13 @@ export default {
       this.page++
       // 2.重新请求接口获取数据
       this.initArticleList()
+    },
+    // 下拉刷新
+    onRefresh() {
+      // 1.让页码值+1
+      this.page++
+      // 2.重新请求接口获取数据
+      this.initArticleList(1)
     }
   },
   components: {
@@ -67,11 +89,6 @@ export default {
 <style lang="less" scoped>
 .home-container {
   padding: 46px 0 50px 0;
-  .van-nav-bar {
-    background-color: #007bff;
-    /deep/ .van-nav-bar__title {
-      color: white;
-    }
-  }
+
 }
 </style>
