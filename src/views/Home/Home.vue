@@ -66,7 +66,6 @@ export default {
     },
     // 只要onLoad被调用，就应该请求一次数据
     onLoad() {
-      console.log('触发了load')
       // 1.当触发了load事件之后，让页码值+1
       this.page++
       // 2.重新请求接口获取数据

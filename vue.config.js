@@ -9,6 +9,7 @@ module.exports = defineConfig({
 })
 
 module.exports = {
+  publicPath: './',
   css: {
     loaderOptions: {
       less: {
