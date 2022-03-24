@@ -42,9 +42,19 @@
 </template>
 
 <script>
+// 按需导入API接口
+import { getArticleListAPI } from '@/api/articleAPI.js'
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
-  name: 'Myuser'
+  name: 'Myuser',
+  methods: {
+    // 封装获取文章列表数据的方法
+    async initArticleList() {
+      // 发起get请求,获取文章的列表数据
+      const { data: res } = await getArticleListAPI(1, 5)
+      console.log(res)
+    }
+  }
 }
 </script>
 
